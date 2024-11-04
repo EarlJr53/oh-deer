@@ -6,6 +6,7 @@ import board
 import pwmio
 from adafruit_servokit import ServoKit
 from simple_pid import PID
+import random
 
 ideal_pos = 40 # I think since we're 80 pixels wide, we are aiming for roughly pixel 40 as the middle
 Kp = 1
@@ -25,8 +26,9 @@ class Servo():
         """
         self.pid = PID(p, i, d, setpoint=setpoint, output_limits=(-1, 1))
         self.bonnet = ServoKit(channels=16)
+        self.sleep()
 
-    def sleep(self):
+    def off(self):
         """Set servo to off"""
         self.bonnet.continuous_servo[0].throttle = 0
 
@@ -60,3 +62,11 @@ class Ultrasonic(pwmio.PWMOut):
     def off(self):
         """Set ultrasonic emitter to off (duty cycle 0)"""
         self.duty_cycle = 0
+
+    def random(self):
+        """Randomly beep in annoying patterns. Rudimentary version"""
+        rand = random.randint(1, 10)
+        if rand > 5:
+            self.set_power(50)
+        else:
+            self.off()

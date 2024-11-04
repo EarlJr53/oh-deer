@@ -21,7 +21,6 @@ r, g, b= cv.split(img_rgb)
 channels = [b, g, r]
 img_blue = channels[0] # better for picking out the hottest parts with the white background color scheme
 
-
 _, thresh = cv.threshold(img_gray, 100, 255, cv.THRESH_BINARY_INV) # thresh_binary_inv is important to pick out the dark part instead of the light part (depends on what color scheme you use)
 # note that right now using the white background image it's looking at some of the darker parts of the heat spectrum (less hot) to
 # identify the object. If we want to switch to the black background image, then it'll be easier to pull out the absolute hotteset part.

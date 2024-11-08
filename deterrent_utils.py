@@ -26,7 +26,7 @@ class Servo():
         """
         self.pid = PID(p, i, d, setpoint=setpoint, output_limits=(-1, 1))
         self.bonnet = ServoKit(channels=16)
-        self.sleep()
+        self.off()
 
     def off(self):
         """Set servo to off"""

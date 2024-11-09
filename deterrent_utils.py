@@ -48,8 +48,9 @@ class Servo():
         print("Speed updated to: " + update)
 
 class Ultrasonic(pwmio.PWMOut):
-    def __init__(self):
-        super().__init__(board.D5, duty_cycle=0, frequency=20000, variable_frequency=True)
+    def __init__(self, frequency = 20000, base_power = 50):
+        super().__init__(board.D5, duty_cycle=0, frequency=frequency, variable_frequency=True)
+        self.base_power = base_power
 
     def set_power(self, power=50):
         """Set ultrasonic emitter power to a given percentage
@@ -67,6 +68,6 @@ class Ultrasonic(pwmio.PWMOut):
         """Randomly beep in annoying patterns. Rudimentary version"""
         rand = random.randint(1, 10)
         if rand > 5:
-            self.set_power(50)
+            self.set_power(self.base_power)
         else:
             self.off()

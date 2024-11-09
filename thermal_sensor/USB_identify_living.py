@@ -101,9 +101,9 @@ while True:
                            use_bilat=True, use_nlm=False)
     
     #image segmentation
-    thresh_temp = 25 # avg human temp is 37, avg deer temp is 38.5. Isha seems to be avg 32 (according to this thing).
-    thresh = np.where(frame > thresh_temp, 1, 0)
-    contours, _ = cv.findContours(thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    # thresh_temp = 25 # avg human temp is 37, avg deer temp is 38.5. Isha seems to be avg 32 (according to this thing).
+    # thresh = np.where(frame > thresh_temp, 1, 0)
+    # contours, _ = cv.findContours(thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
     # print(f'contours: {len(contours)}')
     
@@ -115,7 +115,7 @@ while True:
         logger.debug(format_framestats(data))
 
     if GUI:
-        cv_render(filt_uint8, resize=(400,310), colormap='ironbow')
+        cv_render(filt_uint8, resize=(400,310), colormap='gray')
         # cv_render(filt_uint8, resize=(400,310), colormap='rainbow2')
         # cv_render(remap(frame), resize=(400,310), colormap='rainbow2')
         key = cv.waitKey(1)  # & 0xFF

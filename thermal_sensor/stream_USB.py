@@ -21,9 +21,9 @@ from senxor.utils import data_to_frame, remap, cv_filter,\
                          cv_render, RollingAverageFilter,\
                          connect_senxor
 
-record = True
-output_file_raw = 'outside_2_raw.avi'
-output_file_bbox = 'outside_2_bbox.avi'
+record = False
+output_file_raw = 'outside_4_raw.avi'
+output_file_bbox = 'outside_4_bbox.avi'
 
 # This will enable mi48 logging debug messages
 logger = logging.getLogger(__name__)
@@ -104,29 +104,43 @@ while True:
     min_temp = dminav(data.min())  # + 1.5
     max_temp = dmaxav(data.max())  # - 1.5
     frame = data_to_frame(data, (80,62), hflip=False)
+
+    # don't create bounding boxes when there is not much temp variation in the frame (assume it is noise)
+    not_noise = True
+    # if data.max() - data.min() < 10: # note: adjust this value to change threshold for noise
+    #     not_noise = False 
+
+    # clip bottom values if the difference is too high
+    # if max_temp - min_temp > 30:
+    #     min_temp = max_temp - 30
+
     frame = np.clip(frame, min_temp, max_temp)
     filt_uint8 = cv_filter(remap(frame), par, use_median=True,
                            use_bilat=True, use_nlm=False)
     
     normalized_frame = ((frame - min_temp) / (max_temp - min_temp) * 255).astype(np.uint8)
     
+
     img = normalized_frame.astype(np.uint8)
-    _,thresh = cv.threshold(img,0,255,cv.THRESH_BINARY+cv.THRESH_OTSU)
     bounding = img.copy()
-    contours, _ = cv.findContours(thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-    c_filtered = []
 
-    # filter out contours that are too small
-    min_area = 10  # Adjust this value
-    for contour in contours:
-        area = cv.contourArea(contour)
-        if area > min_area:
-            c_filtered.append(contour)
+    # image segmentation
+    if not_noise:
+        _,thresh = cv.threshold(img,0,255,cv.THRESH_BINARY+cv.THRESH_OTSU)
+        contours, _ = cv.findContours(thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+        c_filtered = []
 
-    for contour in c_filtered:
-    # cv.drawContours(bounding, contour,  -1, (0, 0, 255), 5)
-        x, y, w, h = cv.boundingRect(contour)
-        cv.rectangle(bounding, (x, y), (x + w, y + h), (255, 0, 0), 1)  # draw box
+        # filter out contours that are too small
+        min_area = 20  # Adjust this value
+        for contour in contours:
+            area = cv.contourArea(contour)
+            if area > min_area:
+                c_filtered.append(contour)
+
+        for contour in c_filtered:
+        # cv.drawContours(bounding, contour,  -1, (0, 0, 255), 5)
+            x, y, w, h = cv.boundingRect(contour)
+            cv.rectangle(bounding, (x, y), (x + w, y + h), (255, 0, 0), 1)  # draw box
 
     if record:
         out_raw.write(normalized_frame)

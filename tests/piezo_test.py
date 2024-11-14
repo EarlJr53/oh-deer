@@ -11,4 +11,4 @@ while True:
         time.sleep(0.5)  # On for 1/4 second
         piezo.duty_cycle = 0  # Off
         time.sleep(0.25)  # Pause between notes
-    # time.sleep(0.5)
+    time.sleep(0.5)

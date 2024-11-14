@@ -21,18 +21,17 @@ from senxor.utils import data_to_frame, remap, cv_filter,\
                          cv_render, RollingAverageFilter,\
                          connect_senxor
 
-output_file = 'test_3.avi'
+record = False
+output_file_raw = 'outside_4_raw.avi'
+output_file_bbox = 'outside_4_bbox.avi'
 
 # This will enable mi48 logging debug messages
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "DEBUG"))
 
-print('checkpoint 1')
-
 # Make the a global variable and use it as an instance of the mi48.
 # This allows it to be used directly in a signal_handler.
 global mi48
-print ('checkpoint 2')
 
 # define a signal handler to ensure clean closure upon CTRL+C
 # or kill from terminal
@@ -89,8 +88,10 @@ dminav = RollingAverageFilter(N=10)
 dmaxav = RollingAverageFilter(N=10)
 
 # create VideoWriter
-fourcc = cv.VideoWriter_fourcc(*'XVID')  # Codec for .avi format
-out = cv.VideoWriter(output_file, fourcc, 25, (80, 62), isColor=False)
+if record:
+    fourcc = cv.VideoWriter_fourcc(*'XVID')  # Codec for .avi format
+    out_raw = cv.VideoWriter(output_file_raw, fourcc, 25, (80, 62), isColor=False)
+    out_bbox = cv.VideoWriter(output_file_bbox, fourcc, 25, (80, 62), isColor=False)
 
 while True:
     data, header = mi48.read()
@@ -99,17 +100,51 @@ while True:
         mi48.stop()
         sys.exit(1)
 
+    # normalizes colors based on the min and max temp of the frame
     min_temp = dminav(data.min())  # + 1.5
     max_temp = dmaxav(data.max())  # - 1.5
     frame = data_to_frame(data, (80,62), hflip=False)
+
+    # don't create bounding boxes when there is not much temp variation in the frame (assume it is noise)
+    not_noise = True
+    # if data.max() - data.min() < 10: # note: adjust this value to change threshold for noise
+    #     not_noise = False 
+
+    # clip bottom values if the difference is too high
+    # if max_temp - min_temp > 30:
+    #     min_temp = max_temp - 30
+
     frame = np.clip(frame, min_temp, max_temp)
     filt_uint8 = cv_filter(remap(frame), par, use_median=True,
                            use_bilat=True, use_nlm=False)
     
-    min = -20
-    max = 0
-    normalized_frame = ((frame - min) / (max - min) * 255).astype(np.uint8)
-    out.write(normalized_frame)
+    normalized_frame = ((frame - min_temp) / (max_temp - min_temp) * 255).astype(np.uint8)
+    
+
+    img = normalized_frame.astype(np.uint8)
+    bounding = img.copy()
+
+    # image segmentation
+    if not_noise:
+        _,thresh = cv.threshold(img,0,255,cv.THRESH_BINARY+cv.THRESH_OTSU)
+        contours, _ = cv.findContours(thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+        c_filtered = []
+
+        # filter out contours that are too small
+        min_area = 20  # Adjust this value
+        for contour in contours:
+            area = cv.contourArea(contour)
+            if area > min_area:
+                c_filtered.append(contour)
+
+        for contour in c_filtered:
+        # cv.drawContours(bounding, contour,  -1, (0, 0, 255), 5)
+            x, y, w, h = cv.boundingRect(contour)
+            cv.rectangle(bounding, (x, y), (x + w, y + h), (255, 0, 0), 1)  # draw box
+
+    if record:
+        out_raw.write(normalized_frame)
+        out_bbox.write(bounding)
     
     if header is not None:
         logger.debug('  '.join([format_header(header),
@@ -118,7 +153,7 @@ while True:
         logger.debug(format_framestats(data))
 
     if GUI:
-        cv_render(filt_uint8, resize=(400,310), colormap='ironbow')
+        cv_render(bounding, resize=(400,310), colormap = 'gray')
         # cv_render(filt_uint8, resize=(400,310), colormap='rainbow2')
         # cv_render(remap(frame), resize=(400,310), colormap='rainbow2')
         key = cv.waitKey(1)  # & 0xFF
@@ -127,6 +162,7 @@ while True:
 #    time.sleep(1)
 
 # stop capture and quit
-out.release()
+out_raw.release()
+out_bbox.release()
 mi48.stop()
 cv.destroyAllWindows()

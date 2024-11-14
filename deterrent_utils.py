@@ -10,8 +10,8 @@ import random
 
 ideal_pos = 40 # I think since we're 80 pixels wide, we are aiming for roughly pixel 40 as the middle
 Kp = 1
-Ki = 0
-Kd = 0    
+Ki = .01
+Kd = .01
 
 
 class Servo():
@@ -24,7 +24,7 @@ class Servo():
             d (_type_, optional): _description_. Defaults to Kd.
             setpoint (_type_, optional): _description_. Defaults to ideal_pos.
         """
-        self.pid = PID(p, i, d, setpoint=setpoint, output_limits=(0, 180))
+        self.pid = PID(p, i, d, setpoint=setpoint, output_limits=(60, 120))
         self.bonnet = ServoKit(channels=16)
         self.off()
 
@@ -35,7 +35,7 @@ class Servo():
 
     def idle(self):
         """Set servo to slowly spin at a continuous speed"""
-        self.bonnet.servo[0].angle = 0
+        self.bonnet.servo[0].angle = 90
         print("idle")
 
     def track(self, target):
@@ -47,7 +47,7 @@ class Servo():
         error = target - self.pid.setpoint
         update = self.pid(error)
         self.bonnet.servo[0].angle = update
-        print("Speed updated to: " + update)
+        print(f"Speed updated to: {update}")
 
 class Ultrasonic(pwmio.PWMOut):
     def __init__(self, frequency = 20000, base_power = 50):

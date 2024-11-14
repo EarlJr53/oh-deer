@@ -4,14 +4,14 @@ import time
 lock = False        # Whether the device has detected a deer
 start_time = time.time() # time at last detection
 dwell_time = 0      # number of seconds since last detection
-max_dwell = 10     # max time to wait since last detection before sleep
+max_dwell = 20     # max time to wait since last detection before sleep
 
 servo = Servo()
 ultrasonic = Ultrasonic(440, 20)
 # thermal = Thermal()
 
 lock = True
-target = 40
+target = 50
 
 while (dwell_time < max_dwell):
 
@@ -32,6 +32,9 @@ while (dwell_time < max_dwell):
         ultrasonic.random()
         #start_time = time.time()
 
+        # temporary
+        if (time.time() - start_time) > 10:
+            lock = False
     else:
         ultrasonic.off()
         servo.idle()

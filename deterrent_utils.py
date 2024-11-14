@@ -24,18 +24,18 @@ class Servo():
             d (_type_, optional): _description_. Defaults to Kd.
             setpoint (_type_, optional): _description_. Defaults to ideal_pos.
         """
-        self.pid = PID(p, i, d, setpoint=setpoint, output_limits=(-1, 1))
+        self.pid = PID(p, i, d, setpoint=setpoint, output_limits=(0, 180))
         self.bonnet = ServoKit(channels=16)
         self.off()
 
     def off(self):
         """Set servo to off"""
-        self.bonnet.continuous_servo[0].throttle = 0
+        self.bonnet.servo[0].angle = None
         print("Servo Off")
 
     def idle(self):
         """Set servo to slowly spin at a continuous speed"""
-        self.bonnet.continuous_servo[0].throttle = 0.1
+        self.bonnet.servo[0].angle = 0
         print("idle")
 
     def track(self, target):
@@ -46,7 +46,7 @@ class Servo():
         """
         error = target - self.pid.setpoint
         update = self.pid(error)
-        self.bonnet.continuous_servo[0].throttle = update
+        self.bonnet.servo[0].angle = update
         print("Speed updated to: " + update)
 
 class Ultrasonic(pwmio.PWMOut):

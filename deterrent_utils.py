@@ -31,11 +31,13 @@ class Servo():
     def off(self):
         """Set servo to off"""
         self.bonnet.continuous_servo[0].throttle = 0
+        print("Servo Off")
 
     def idle(self):
         """Set servo to slowly spin at a continuous speed"""
         self.bonnet.continuous_servo[0].throttle = 0.1
-    
+        print("idle")
+
     def track(self, target):
         """Adjust servo speed using PID to track deer.
 

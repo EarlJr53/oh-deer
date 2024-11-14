@@ -4,13 +4,16 @@ import time
 lock = False        # Whether the device has detected a deer
 start_time = time.time() # time at last detection
 dwell_time = 0      # number of seconds since last detection
-max_dwell = 120     # max time to wait since last detection before sleep
+max_dwell = 10     # max time to wait since last detection before sleep
 
 servo = Servo()
 ultrasonic = Ultrasonic(440, 20)
 # thermal = Thermal()
 
-while lock | dwell_time < max_dwell:
+lock = True
+target = 40
+
+while (dwell_time < max_dwell):
 
     # Call thermal camera object to see if there is a deer in the frame
     # Return in the form (lock, target)
@@ -19,15 +22,15 @@ while lock | dwell_time < max_dwell:
 
     # lock, target = thermal.detect()   # it should look like this
     # target = 40                         # temporary until the thermal camera is integrated
-    target = input()
-    if target == -1: lock = False
-    else: lock = True
+    #target = input()
+    #if target == -1: lock = False
+    #else: lock = True
 
 
     if lock:
         servo.track(target)
         ultrasonic.random()
-        start_time = time.time()
+        #start_time = time.time()
 
     else:
         ultrasonic.off()
@@ -35,7 +38,7 @@ while lock | dwell_time < max_dwell:
 
 
     dwell_time = time.time() - start_time
-
+    print(dwell_time)
 
 ultrasonic.off()
 servo.off()

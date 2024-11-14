@@ -12,4 +12,8 @@ time.sleep(1)
 kit.continuous_servo[0].throttle = -1
 time.sleep(1)
 # kit.servo[0].angle = 0
-kit.continuous_servo[0].throttle = 0
+kit.continuous_servo[0].throttle = 0.0000
+kit.continuous_servo[0].throttle
+time.sleep(5)
+kit.continuous_servo[0].throttle
+print(kit.continuous_servo[0].throttle)

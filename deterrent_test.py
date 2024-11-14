@@ -1,10 +1,11 @@
 from deterrent_utils import Servo, Ultrasonic
 import time
+import random
 
 lock = False        # Whether the device has detected a deer
 start_time = time.time() # time at last detection
 dwell_time = 0      # number of seconds since last detection
-max_dwell = 20     # max time to wait since last detection before sleep
+max_dwell = 10     # max time to wait since last detection before sleep
 
 servo = Servo()
 ultrasonic = Ultrasonic(440, 20)
@@ -25,7 +26,12 @@ while (dwell_time < max_dwell):
     #target = input()
     #if target == -1: lock = False
     #else: lock = True
-
+    rand = random.randint(20, 60)
+    if rand % 5 == 1:
+        lock = True
+        target = rand
+    else:
+        lock = False
 
     if lock:
         servo.track(target)
@@ -33,8 +39,8 @@ while (dwell_time < max_dwell):
         #start_time = time.time()
 
         # temporary
-        if (time.time() - start_time) > 10:
-            lock = False
+        #if (time.time() - start_time) > 5:
+           # lock = False
     else:
         ultrasonic.off()
         servo.idle()

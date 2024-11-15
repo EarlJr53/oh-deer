@@ -9,7 +9,7 @@ from simple_pid import PID
 import random
 
 ideal_pos = 40 # I think since we're 80 pixels wide, we are aiming for roughly pixel 40 as the middle
-Kp = 1
+Kp = .1
 Ki = .01
 Kd = .01
 
@@ -24,7 +24,7 @@ class Servo():
             d (_type_, optional): _description_. Defaults to Kd.
             setpoint (_type_, optional): _description_. Defaults to ideal_pos.
         """
-        self.pid = PID(p, i, d, setpoint=setpoint, output_limits=(60, 120))
+        self.pid = PID(p, i, d, setpoint=setpoint, output_limits=(50, 180))
         self.bonnet = ServoKit(channels=16)
         self.off()
 
@@ -47,7 +47,7 @@ class Servo():
         error = target - self.pid.setpoint
         update = self.pid(error)
         self.bonnet.servo[0].angle = update
-        print(f"Speed updated to: {update}")
+        print(f"Target: {target}, Speed updated to: {update}")
 
 class Ultrasonic(pwmio.PWMOut):
     def __init__(self, frequency = 20000, base_power = 50):
@@ -60,7 +60,11 @@ class Ultrasonic(pwmio.PWMOut):
         Args:
             power (int, optional): Percentage to set emitter power to. Defaults to 50.
         """
-        self.duty_cycle = 65535 // (100/power)
+        if self.base_power == 0:
+            self.duty_cycle = 0
+            print("Ultrasonic Activated")
+        else:
+            self.duty_cycle = 65535 // (100/power)
 
     def off(self):
         """Set ultrasonic emitter to off (duty cycle 0)"""

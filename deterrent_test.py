@@ -8,7 +8,7 @@ dwell_time = 0      # number of seconds since last detection
 max_dwell = 10     # max time to wait since last detection before sleep
 
 servo = Servo()
-ultrasonic = Ultrasonic(440, 20)
+ultrasonic = Ultrasonic(10000, 0)
 # thermal = Thermal()
 
 lock = True

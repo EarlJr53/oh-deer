@@ -10,6 +10,7 @@ x = 0
 while x <= 180:
     kit.servo[0].angle = x
     time.sleep(1)
+    print(x)
     x += 5
 
 kit.servo[0].angle = None

@@ -7,12 +7,12 @@ start_time = time.time() # time at last detection
 dwell_time = 0      # number of seconds since last detection
 max_dwell = 10     # max time to wait since last detection before sleep
 
-servo = Servo()
+servo = Servo(pid_enable = False)
 ultrasonic = Ultrasonic(10000, 0)
 # thermal = Thermal()
 
-lock = True
-target = 50
+lock = False
+target = 40
 
 while (dwell_time < max_dwell):
 

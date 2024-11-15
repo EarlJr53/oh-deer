@@ -15,7 +15,7 @@ Kd = .01
 
 
 class Servo():
-    def __init__(self, p=Kp, i=Ki, d=Kd, setpoint=ideal_pos):
+    def __init__(self, pid_enable=True, setpoint=ideal_pos, p=Kp, i=Ki, d=Kd, ):
         """_summary_
 
         Args:
@@ -24,7 +24,10 @@ class Servo():
             d (_type_, optional): _description_. Defaults to Kd.
             setpoint (_type_, optional): _description_. Defaults to ideal_pos.
         """
-        self.pid = PID(p, i, d, setpoint=setpoint, output_limits=(50, 180))
+        if pid_enable:
+            self.pid = PID(p, i, d, setpoint=setpoint, output_limits=(50, 180))
+        self.pid_enable = pid_enable
+        self.setpoint = setpoint
         self.bonnet = ServoKit(channels=16)
         self.off()
 
@@ -44,8 +47,14 @@ class Servo():
         Args:
             target (float): Position of target to align with
         """
-        error = target - self.pid.setpoint
-        update = self.pid(error)
+        if self.pid_enable:
+            error = target - self.pid.setpoint
+            update = self.pid(error)
+        else:
+            if target > self.setpoint:
+                update = 150
+            elif target < self.setpoint:
+                update = 80
         self.bonnet.servo[0].angle = update
         print(f"Target: {target}, Speed updated to: {update}")
 

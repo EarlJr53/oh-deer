@@ -11,8 +11,9 @@ import numpy as np
 
 try:
     import cv2 as cv
+    import matplotlib
 except:
-    print("Please install OpenCV (or link existing installation)"
+    print("Please install OpenCV"
           " to see the thermal image")
     exit(1)
 
@@ -21,9 +22,13 @@ from senxor.utils import data_to_frame, remap, cv_filter,\
                          cv_render, RollingAverageFilter,\
                          connect_senxor
 
-record = False
-output_file_raw = 'outside_4_raw.avi'
-output_file_bbox = 'outside_4_bbox.avi'
+# video recordings
+record = True
+output_file_raw = 'test1.mp4'
+output_file_bbox = 'test1_bbox.mp4'
+
+# other settings
+fps = 15
 
 # This will enable mi48 logging debug messages
 logger = logging.getLogger(__name__)
@@ -62,7 +67,7 @@ logger.info(mi48.camera_info)
 if len(sys.argv) == 2:
     STREAM_FPS = int(sys.argv[1])
 else:
-    STREAM_FPS = 15
+    STREAM_FPS = fps
 mi48.set_fps(STREAM_FPS)
 
 # see if filtering is available in MI48 and set it up
@@ -89,9 +94,9 @@ dmaxav = RollingAverageFilter(N=10)
 
 # create VideoWriter
 if record:
-    fourcc = cv.VideoWriter_fourcc(*'XVID')  # Codec for .avi format
-    out_raw = cv.VideoWriter(output_file_raw, fourcc, 25, (80, 62), isColor=False)
-    out_bbox = cv.VideoWriter(output_file_bbox, fourcc, 25, (80, 62), isColor=False)
+    fourcc = cv.VideoWriter_fourcc(*'MP4V')  # Codec for .avi format
+    out_raw = cv.VideoWriter(output_file_raw, fourcc, fps, (80, 62), isColor=False)
+    out_bbox = cv.VideoWriter(output_file_bbox, fourcc, fps, (80, 62), isColor=False)
 
 while True:
     data, header = mi48.read()
@@ -111,16 +116,17 @@ while True:
     #     not_noise = False 
 
     # clip bottom values if the difference is too high
-    # if max_temp - min_temp > 30:
-    #     min_temp = max_temp - 30
+    if max_temp - min_temp > 20:
+        min_temp = max_temp - 20
 
     frame = np.clip(frame, min_temp, max_temp)
     filt_uint8 = cv_filter(remap(frame), par, use_median=True,
                            use_bilat=True, use_nlm=False)
     
     normalized_frame = ((frame - min_temp) / (max_temp - min_temp) * 255).astype(np.uint8)
+    # normalized_frame = ((filt_uint8 - min_temp) / (max_temp - min_temp) * 255).astype(np.uint8)
     
-
+    # img = filt_uint8.astype(np.uint8)
     img = normalized_frame.astype(np.uint8)
     bounding = img.copy()
 
@@ -153,9 +159,9 @@ while True:
         logger.debug(format_framestats(data))
 
     if GUI:
-        cv_render(bounding, resize=(400,310), colormap = 'gray')
-        # cv_render(filt_uint8, resize=(400,310), colormap='rainbow2')
-        # cv_render(remap(frame), resize=(400,310), colormap='rainbow2')
+        cv_render(filt_uint8, title='filtered', resize=(400,310), colormap='gray')
+        cv_render(bounding, title='bounding', resize=(400,310), colormap='gray')
+        # cv_render(thresh, title='binarized', resize=(400,310), colormap='gray')
         key = cv.waitKey(1)  # & 0xFF
         if key == ord("q"):
             break

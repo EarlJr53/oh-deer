@@ -24,8 +24,9 @@ from senxor.utils import data_to_frame, remap, cv_filter,\
 
 # video recordings
 record = True
-output_file_raw = 'test1.mp4'
-output_file_bbox = 'test1_bbox.mp4'
+output_file_raw = '11_17_test_vids/behind_tree_raw.mp4'
+output_file_processed = '11_17_test_vids/behind_tree_processed.mp4'
+output_file_bbox = '11_17_test_vids/behind_tree_bbox.mp4'
 
 # other settings
 fps = 15
@@ -96,6 +97,7 @@ dmaxav = RollingAverageFilter(N=10)
 if record:
     fourcc = cv.VideoWriter_fourcc(*'MP4V')  # Codec for .avi format
     out_raw = cv.VideoWriter(output_file_raw, fourcc, fps, (80, 62), isColor=False)
+    out_processed = cv.VideoWriter(output_file_processed, fourcc, fps, (80, 62), isColor=False)
     out_bbox = cv.VideoWriter(output_file_bbox, fourcc, fps, (80, 62), isColor=False)
 
 while True:
@@ -110,6 +112,8 @@ while True:
     max_temp = dmaxav(data.max())  # - 1.5
     frame = data_to_frame(data, (80,62), hflip=False)
 
+    if record:
+        out_raw.write(frame.astype(np.uint8))
     # don't create bounding boxes when there is not much temp variation in the frame (assume it is noise)
     not_noise = True
     # if data.max() - data.min() < 10: # note: adjust this value to change threshold for noise
@@ -147,19 +151,23 @@ while True:
         # cv.drawContours(bounding, contour,  -1, (0, 0, 255), 5)
             x, y, w, h = cv.boundingRect(contour)
             cv.rectangle(bounding, (x, y), (x + w, y + h), (255, 0, 0), 1)  # draw box
+        
+        print(bounding.shape)
 
     if record:
-        out_raw.write(normalized_frame)
+        out_processed.write(normalized_frame)
         out_bbox.write(bounding)
     
-    if header is not None:
-        logger.debug('  '.join([format_header(header),
-                                format_framestats(data)]))
-    else:
-        logger.debug(format_framestats(data))
+    # uncomment to show min, max, avg, std
+    # if header is not None:
+    #     logger.debug('  '.join([format_header(header),
+    #                             format_framestats(data)]))
+    # else:
+    #     logger.debug(format_framestats(data))
 
     if GUI:
         cv_render(filt_uint8, title='filtered', resize=(400,310), colormap='gray')
+        cv_render(normalized_frame, title='processed', resize=(400,310), colormap='gray')
         cv_render(bounding, title='bounding', resize=(400,310), colormap='gray')
         # cv_render(thresh, title='binarized', resize=(400,310), colormap='gray')
         key = cv.waitKey(1)  # & 0xFF

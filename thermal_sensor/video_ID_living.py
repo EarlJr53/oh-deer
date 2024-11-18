@@ -9,10 +9,11 @@ import serial
 import numpy as np
 
 # Path to the video file
-video_path = "/home/igoyal/RoboSys/oh-deer/test1.mp4"
+video_path = "/home/igoyal/RoboSys/oh-deer/test1_raw.mp4"
 
 # Open the video file
 cap = cv.VideoCapture(video_path)
+frame_delay = int(1000 / 15) #15 is the current fps, adjust as necessary
 
 # Check if the video was successfully opened
 if not cap.isOpened():
@@ -29,8 +30,7 @@ par = {'blur_ks':3, 'd':5, 'sigmaColor': 27, 'sigmaSpace': 27}
 while True:
     # Read the next frame
     ret, frame = cap.read()
-    print(frame)
-    frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY) #.astype(np.uint8)
+    # frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY) #.astype(np.uint8)
     # print(frame.shape)
     
 
@@ -38,6 +38,9 @@ while True:
     if not ret:
         print("End of video.")
         break
+
+    frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+    print(frame.shape)
 
     dminav = RollingAverageFilter(N=10)
     dmaxav = RollingAverageFilter(N=10)
@@ -54,43 +57,45 @@ while True:
     if max_temp - min_temp > 20:
         min_temp = max_temp - 20
 
-    # frame = np.clip(frame, min_temp, max_temp)
-    # filt_uint8 = cv_filter(remap(frame), par, use_median=True,
-    #                        use_bilat=True, use_nlm=False)
+
+    frame = np.clip(frame, min_temp, max_temp).astype(np.uint8)
+    filt_uint8 = cv_filter(remap(frame), par, use_median=True,
+                           use_bilat=True, use_nlm=False)
     
-    # normalized_frame = ((frame - min_temp) / (max_temp - min_temp) * 255).astype(np.uint8)
+    normalized_frame = ((frame - min_temp) / (max_temp - min_temp) * 255).astype(np.uint8)
     # normalized_frame = ((filt_uint8 - min_temp) / (max_temp - min_temp) * 255).astype(np.uint8)
     
     # img = filt_uint8.astype(np.uint8)
-    # img = normalized_frame.astype(np.uint8)
-    # bounding = img.copy()
+    img = normalized_frame.astype(np.uint8)
+    bounding = img.copy()
 
     # # image segmentation
-    # if not_noise:
-    #     _,thresh = cv.threshold(img,0,255,cv.THRESH_BINARY+cv.THRESH_OTSU)
-    #     contours, _ = cv.findContours(thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-    #     c_filtered = []
+    if not_noise:
+        _,thresh = cv.threshold(img.astype(np.uint8),0,255,cv.THRESH_BINARY+cv.THRESH_OTSU)
+        contours, _ = cv.findContours(thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+        c_filtered = []
 
-    #     # filter out contours that are too small
-    #     min_area = 20  # Adjust this value
-    #     for contour in contours:
-    #         area = cv.contourArea(contour)
-    #         if area > min_area:
-    #             c_filtered.append(contour)
+        # filter out contours that are too small
+        min_area = 20  # Adjust this value
+        for contour in contours:
+            area = cv.contourArea(contour)
+            if area > min_area:
+                c_filtered.append(contour)
 
-    #     for contour in c_filtered:
-    #     # cv.drawContours(bounding, contour,  -1, (0, 0, 255), 5)
-    #         x, y, w, h = cv.boundingRect(contour)
-    #         cv.rectangle(bounding, (x, y), (x + w, y + h), (255, 0, 0), 1)  # draw box
+        for contour in c_filtered:
+        # cv.drawContours(bounding, contour,  -1, (0, 0, 255), 5)
+            x, y, w, h = cv.boundingRect(contour)
+            cv.rectangle(bounding, (x, y), (x + w, y + h), (255, 0, 0), 1)  # draw box
 
 
     # Display the processed frame
     # cv.imshow("Processed Frame", processed_frame)
     # cv.imshow("Processed Frame", frame, resize=(400,310))
-    cv_render(frame, title='frame', resize=(400,310), colormap='gray')
+    bounding.astype(np.uint8)
+    cv_render(bounding, title='frame',resize=(400,310), colormap='gray', interpolation=cv.INTER_CUBIC)
 
     # Press 'q' to exit the video playback
-    if cv.waitKey(30) & 0xFF == ord('q'):
+    if cv.waitKey(frame_delay) & 0xFF == ord('q'):
         break
 
 # Release the video capture object and close display windows

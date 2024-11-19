@@ -11,7 +11,7 @@ servo = Servo(pid_enable=False)
 ultrasonic = Ultrasonic()
 thermal = Thermal()
 
-while lock | dwell_time < max_dwell:
+while lock or (dwell_time < max_dwell):
 
     # Call thermal camera object to see if there is a deer in the frame
     # Return in the form (lock, target)

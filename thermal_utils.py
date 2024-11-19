@@ -1,5 +1,6 @@
 import sys
 sys.path.append("/home/ohdeer/venv/lib/python3.11/site-packages")
+sys.path.append("/home/ohdeer/pysenxor-master/")
 import os
 import signal
 import time
@@ -7,17 +8,17 @@ import logging
 import serial
 import numpy as np
 import cv2 as cv
-import datetime
+from datetime import datetime
 
-from thermal_sensor.senxor.mi48 import MI48, format_header, format_framestats
-from thermal_sensor.senxor.utils import data_to_frame, remap, cv_filter,\
+from senxor.mi48 import MI48, format_header, format_framestats
+from senxor.utils import data_to_frame, remap, cv_filter,\
                          cv_render, RollingAverageFilter,\
                          connect_senxor
 
 
 class Thermal():
     def __init__(self):
-        
+
         self.startup()
 
         # initiate continuous frame acquisition
@@ -25,19 +26,21 @@ class Thermal():
         mi48.start(stream=True, with_header=with_header)
 
         self.logger
-        self.recorder
+        self.recorder = Recorder()
         self.recording = False
         self.rec_length = 15
-        self.frame
+        #self.frame
         self.deer_pos = -1
         self.lock = False
+
+        self.read_frame()
 
     def startup(self):
         # Copied from original source code
 
         # This will enable mi48 logging debug messages
         self.logger = logging.getLogger(__name__)
-        logging.basicConfig(level=os.environ.get("LOGLEVEL", "DEBUG"))
+#        logging.basicConfig(level=os.environ.get("LOGLEVEL", "DEBUG"))
 
         # Make the a global variable and use it as an instance of the mi48.
         # This allows it to be used directly in a signal_handler.
@@ -204,17 +207,18 @@ class Recorder():
     def __init__(self):
 
         now = datetime.now()
-        date_folder = now.strftime("/home/ohdeer/usb/%Y-%m-%d_clips/")
-        os.mkdir(date_folder, exist_ok=True)
+        date_folder = now.strftime("/home/ohdeer/oh-deer/auto-tests/%Y-%m-%d_clips/")
+        if not os.path.exists(date_folder):
+            os.makedirs(date_folder)
 
         self.filename = now.strftime("%H-%M-%S")
         self.fps = 15
         self.start_time = time.time()
 
-        fourcc = cv.VideoWriter_fourcc(*'MP4V')  # Codec for .avi format
+        fourcc = cv.VideoWriter_fourcc(*'MJPG')  # Codec for .avi format
         # self.raw = cv.VideoWriter(f"{self.filename}_raw", fourcc, self.fps, (80, 62), isColor=False)
         # self.processed = cv.VideoWriter(f"{self.filename}_processed", fourcc, self.fps, (80, 62), isColor=False)
-        self.bbox = cv.VideoWriter(f"{self.filename}_bbox", fourcc, self.fps, (80, 62), isColor=False)
+        self.bbox = cv.VideoWriter(f"{date_folder}{self.filename}_bbox.avi", fourcc, self.fps, (80, 62), isColor=False)
 
     def get_time(self):
         return time.time() - self.start_time
@@ -224,10 +228,11 @@ class Recorder():
 
     def stop(self):
         self.bbox.release()
+        print("Stop recording")
         del self
         
     def __del__(self):
-        print("End recording")
+        print("Delete recorder")
 
 
        

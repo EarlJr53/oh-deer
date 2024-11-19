@@ -117,7 +117,8 @@ class Thermal():
         min_temp = self.dminav(self.frame.min())  # + 1.5
         max_temp = self.dmaxav(self.frame.max())  # - 1.5
         frame = data_to_frame(self.frame, (80,62), hflip=False)
-        
+        frame = cv.rotate(frame, cv.ROTATE_90_CLOCKWISE)
+
         raw = frame.astype(np.uint8)
         # print(f'raw -  min:{np.min(raw)}, max:{np.max(raw)}')
 

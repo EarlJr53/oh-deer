@@ -117,7 +117,7 @@ class Thermal():
         min_temp = self.dminav(self.frame.min())  # + 1.5
         max_temp = self.dmaxav(self.frame.max())  # - 1.5
         frame = data_to_frame(self.frame, (80,62), hflip=False)
-        frame = np.rot90(frame, 1)
+#        frame = np.rot90(frame, 1).copy()
 
         raw = frame.astype(np.uint8)
         # print(f'raw -  min:{np.min(raw)}, max:{np.max(raw)}')
@@ -175,7 +175,7 @@ class Thermal():
                 # print('cycle done')
 
                 self.lock = True
-                self.deer_pos = centroid_x
+                self.deer_pos = centroid_y
 
                 if not self.recording:
                     self.recorder = Recorder()
@@ -225,7 +225,7 @@ class Recorder():
         return time.time() - self.start_time
     
     def write_bbox(self, frame):
-        self.bbox.write(frame)
+        self.bbox.write(cv.rotate(frame, cv.ROTATE_90_CLOCKWISE))
 
     def stop(self):
         self.bbox.release()

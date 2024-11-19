@@ -73,7 +73,7 @@ class Ultrasonic(pwmio.PWMOut):
         """
         if self.base_power == 0:
             self.duty_cycle = 0
-            print("Ultrasonic Activated")
+            # print("Ultrasonic Activated")
         else:
             self.duty_cycle = 65535 // (100/power)
 

@@ -116,7 +116,7 @@ class Thermal():
         frame = data_to_frame(self.frame, (80,62), hflip=False)
         
         raw = frame.astype(np.uint8)
-        print(f'raw -  min:{np.min(raw)}, max:{np.max(raw)}')
+        # print(f'raw -  min:{np.min(raw)}, max:{np.max(raw)}')
 
         not_noise = True
         if frame.max() - frame.min() < 10: # note: adjust this value to change threshold for noise
@@ -164,7 +164,7 @@ class Thermal():
                 
                 centroid_x = int(x + w/2) # horizontal centroid wrt pixels 0-80
                 centroid_y = int(y + h/2) # verticle centroid
-                print(f'centroid:{centroid_x}')
+                # print(f'centroid:{centroid_x}')
                 cv.circle(bounding, (centroid_x, centroid_y), 3, (255, 0, 0), 2)
                 # print(f'contour - x:{x}, y:{y}, w:{w}, h:{h}')
                 # print(f'area: {cv.contourArea(contour)}')

@@ -7,7 +7,7 @@ start_time = time.time() # time at last detection
 dwell_time = 0      # number of seconds since last detection
 max_dwell = 20     # max time to wait since last detection before sleep
 
-servo = Servo()
+servo = Servo(pid_enable=False)
 ultrasonic = Ultrasonic()
 thermal = Thermal()
 

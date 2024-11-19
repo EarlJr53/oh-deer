@@ -26,12 +26,20 @@ while (dwell_time < max_dwell):
     #target = input()
     #if target == -1: lock = False
     #else: lock = True
-    rand = random.randint(20, 60)
-    if rand % 5 == 1:
-        lock = True
-        target = rand
-    else:
+    #rand = random.randint(1, 80)
+    if target == 40:
         lock = False
+        target = random.randint(1, 80)
+    else:
+        if target < 43 and target > 37:
+            lock = True
+        else:
+            lock = False
+
+        if target > 40:
+            target -= 1
+        elif target < 40:
+            target += 1
 
     if lock:
         servo.track(target)
@@ -43,11 +51,11 @@ while (dwell_time < max_dwell):
            # lock = False
     else:
         ultrasonic.off()
-        servo.idle()
+#        servo.idle()
 
 
     dwell_time = time.time() - start_time
-    print(dwell_time)
+#    print(dwell_time)
 
 ultrasonic.off()
 servo.off()

@@ -34,12 +34,12 @@ class Servo():
     def off(self):
         """Set servo to off"""
         self.bonnet.servo[0].angle = None
-        print("Servo Off")
+#        print("Servo Off")
 
     def idle(self):
         """Set servo to slowly spin at a continuous speed"""
         self.bonnet.servo[0].angle = 90
-        print("idle")
+#        print("idle")
 
     def track(self, target):
         """Adjust servo speed using PID to track deer.
@@ -52,11 +52,13 @@ class Servo():
             update = self.pid(error)
         else:
             if target > self.setpoint:
-                update = 150
+                update = 180
             elif target < self.setpoint:
-                update = 80
+                update = 30
+            else:
+                update = None
         self.bonnet.servo[0].angle = update
-        print(f"Target: {target}, Speed updated to: {update}")
+#        print(f"Target: {target}, Speed updated to: {update}")
 
 class Ultrasonic(pwmio.PWMOut):
     def __init__(self, frequency = 20000, base_power = 50):

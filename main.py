@@ -23,7 +23,7 @@ while lock | dwell_time < max_dwell:
 
     if lock:
         servo.track(target)
-        ultrasonic.random()
+        # ultrasonic.random()
         start_time = time.time()
         print(target)
 

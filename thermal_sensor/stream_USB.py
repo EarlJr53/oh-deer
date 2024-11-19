@@ -23,10 +23,10 @@ from senxor.utils import data_to_frame, remap, cv_filter,\
                          connect_senxor
 
 # video recordings
-record = True
-output_file_raw = '11_17_test_vids/behind_tree_raw.mp4'
-output_file_processed = '11_17_test_vids/behind_tree_processed.mp4'
-output_file_bbox = '11_17_test_vids/behind_tree_bbox.mp4'
+record = False
+output_file_raw = ''
+output_file_processed = ''
+output_file_bbox = ''
 
 # other settings
 fps = 15
@@ -111,9 +111,11 @@ while True:
     min_temp = dminav(data.min())  # + 1.5
     max_temp = dmaxav(data.max())  # - 1.5
     frame = data_to_frame(data, (80,62), hflip=False)
+    raw = frame.astype(np.uint8)
+    print(f'raw -  min:{np.min(raw)}, max:{np.max(raw)}')
 
     if record:
-        out_raw.write(frame.astype(np.uint8))
+        out_raw.write(raw.astype(np.uint8))
     # don't create bounding boxes when there is not much temp variation in the frame (assume it is noise)
     not_noise = True
     # if data.max() - data.min() < 10: # note: adjust this value to change threshold for noise
@@ -133,6 +135,7 @@ while True:
     # img = filt_uint8.astype(np.uint8)
     img = normalized_frame.astype(np.uint8)
     bounding = img.copy()
+    print(f'normalized -  min:{np.min(img)}, max:{np.max(img)}')
 
     # image segmentation
     if not_noise:
@@ -152,7 +155,6 @@ while True:
             x, y, w, h = cv.boundingRect(contour)
             cv.rectangle(bounding, (x, y), (x + w, y + h), (255, 0, 0), 1)  # draw box
         
-        print(bounding.shape)
 
     if record:
         out_processed.write(normalized_frame)
@@ -166,6 +168,7 @@ while True:
     #     logger.debug(format_framestats(data))
 
     if GUI:
+        cv_render(raw, title='raw', resize=(400,310), colormap='gray')
         cv_render(filt_uint8, title='filtered', resize=(400,310), colormap='gray')
         cv_render(normalized_frame, title='processed', resize=(400,310), colormap='gray')
         cv_render(bounding, title='bounding', resize=(400,310), colormap='gray')

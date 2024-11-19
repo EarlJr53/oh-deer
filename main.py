@@ -1,5 +1,5 @@
 from deterrent_utils import Servo, Ultrasonic
-from thermal_utils import Thermal
+from thermal_utils.py import Thermal
 import time
 
 lock = False        # Whether the device has detected a deer

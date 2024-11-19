@@ -2,7 +2,7 @@ import time
 import board
 import pwmio
 
-piezo = pwmio.PWMOut(board.D5, duty_cycle=0, frequency=440, variable_frequency=True)
+piezo = pwmio.PWMOut(board.D5, duty_cycle=0, frequency=10000, variable_frequency=True)
 
 while True:
     for f in (10000, 20000):

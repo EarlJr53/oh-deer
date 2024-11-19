@@ -7,6 +7,7 @@ import logging
 import serial
 import numpy as np
 import cv2 as cv
+import datetime
 
 from thermal_sensor.senxor.mi48 import MI48, format_header, format_framestats
 from thermal_sensor.senxor.utils import data_to_frame, remap, cv_filter,\
@@ -24,6 +25,9 @@ class Thermal():
         mi48.start(stream=True, with_header=with_header)
 
         self.logger
+        self.recorder
+        self.recording = False
+        self.rec_length = 15
         self.frame
         self.deer_pos = -1
         self.lock = False
@@ -134,45 +138,56 @@ class Thermal():
         bounding = img.copy()
 
         if not_noise:
-                _,thresh = cv.threshold(img,0,255,cv.THRESH_BINARY+cv.THRESH_OTSU)
-                contours, _ = cv.findContours(thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-                c_filtered = []
+            _,thresh = cv.threshold(img,0,255,cv.THRESH_BINARY+cv.THRESH_OTSU)
+            contours, _ = cv.findContours(thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+            c_filtered = []
 
-                # filter out contours that are too small
-                min_area = 20  # Adjust this value
-                max_area = 2300
-                for contour in contours:
-                    area = cv.contourArea(contour)
-                    if area > min_area and area < max_area:
-                        c_filtered.append(contour)
+            # filter out contours that are too small
+            min_area = 20  # Adjust this value
+            max_area = 2300
+            for contour in contours:
+                area = cv.contourArea(contour)
+                if area > min_area and area < max_area:
+                    c_filtered.append(contour)
 
-                # for contour in c_filtered:
-                # # cv.drawContours(bounding, contour,  -1, (0, 0, 255), 5)
-                #     x, y, w, h = cv.boundingRect(contour)
-                #     cv.rectangle(bounding, (x, y), (x + w, y + h), (255, 0, 0), 1)  # draw box
+            # for contour in c_filtered:
+            # # cv.drawContours(bounding, contour,  -1, (0, 0, 255), 5)
+            #     x, y, w, h = cv.boundingRect(contour)
+            #     cv.rectangle(bounding, (x, y), (x + w, y + h), (255, 0, 0), 1)  # draw box
 
-                if len(c_filtered) >= 1:
+            if len(c_filtered) >= 1:
 
-            #     cv.drawContours(bounding, contour,  -1, (0, 0, 255), 5)
-                    contour = c_filtered[0]
-                    x, y, w, h = cv.boundingRect(contour)
-                    cv.rectangle(bounding, (x, y), (x + w, y + h), (255, 0, 0), 1)  # draw box
-                    
-                    centroid_x = int(x + w/2) # horizontal centroid wrt pixels 0-80
-                    centroid_y = int(y + h/2) # verticle centroid
-                    print(f'centroid:{centroid_x}')
-                    cv.circle(bounding, (centroid_x, centroid_y), 3, (255, 0, 0), 2)
-                    # print(f'contour - x:{x}, y:{y}, w:{w}, h:{h}')
-                    # print(f'area: {cv.contourArea(contour)}')
-                    # print('cycle done')
+        #     cv.drawContours(bounding, contour,  -1, (0, 0, 255), 5)
+                contour = c_filtered[0]
+                x, y, w, h = cv.boundingRect(contour)
+                cv.rectangle(bounding, (x, y), (x + w, y + h), (255, 0, 0), 1)  # draw box
+                
+                centroid_x = int(x + w/2) # horizontal centroid wrt pixels 0-80
+                centroid_y = int(y + h/2) # verticle centroid
+                print(f'centroid:{centroid_x}')
+                cv.circle(bounding, (centroid_x, centroid_y), 3, (255, 0, 0), 2)
+                # print(f'contour - x:{x}, y:{y}, w:{w}, h:{h}')
+                # print(f'area: {cv.contourArea(contour)}')
+                # print('cycle done')
 
-                    self.lock = True
-                    self.deer_pos = centroid_x
-                else:
-                    self.lock = False
-                    self.deer_pos = -1
-        else:
-            pass
+                self.lock = True
+                self.deer_pos = centroid_x
+
+                if not self.recording:
+                    self.recorder = Recorder()
+                    self.recording = True
+            else:
+                self.lock = False
+                self.deer_pos = -1
+        # else:
+        #     pass
+
+        if self.recording:
+            self.recorder.write_bbox(bounding)
+
+            if self.recorder.get_time() >= self.rec_length:
+                self.recorder.stop()
+                self.recording = False
 
     def detect(self):
         self.read_frame()
@@ -181,7 +196,40 @@ class Thermal():
     
     def off(self):
         # stop capture and quit
+        self.recorder.stop()
         mi48.stop()
+
+
+class Recorder():
+    def __init__(self):
+
+        now = datetime.now()
+        date_folder = now.strftime("/home/ohdeer/usb/%Y-%m-%d_clips/")
+        os.mkdir(date_folder, exist_ok=True)
+
+        self.filename = now.strftime("%H-%M-%S")
+        self.fps = 15
+        self.start_time = time.time()
+
+        fourcc = cv.VideoWriter_fourcc(*'MP4V')  # Codec for .avi format
+        # self.raw = cv.VideoWriter(f"{self.filename}_raw", fourcc, self.fps, (80, 62), isColor=False)
+        # self.processed = cv.VideoWriter(f"{self.filename}_processed", fourcc, self.fps, (80, 62), isColor=False)
+        self.bbox = cv.VideoWriter(f"{self.filename}_bbox", fourcc, self.fps, (80, 62), isColor=False)
+
+    def get_time(self):
+        return time.time() - self.start_time
+    
+    def write_bbox(self, frame):
+        self.bbox.write(frame)
+
+    def stop(self):
+        self.bbox.release()
+        del self
+        
+    def __del__(self):
+        print("End recording")
+
+
        
 
 # Visualise data after reshaping the array properly

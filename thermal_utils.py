@@ -225,7 +225,8 @@ class Recorder():
         return time.time() - self.start_time
     
     def write_bbox(self, frame):
-        self.bbox.write(cv.rotate(frame, cv.ROTATE_90_CLOCKWISE))
+#        self.bbox.write(cv.rotate(frame, cv.ROTATE_90_CLOCKWISE))
+         self.bbox.write(frame)
 
     def stop(self):
         self.bbox.release()

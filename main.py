@@ -29,7 +29,8 @@ while lock or (dwell_time < max_dwell):
 
     else:
         ultrasonic.off()
-        servo.idle()
+        #servo.idle()
+        servo.off()
         print("Idle")
 
     dwell_time = time.time() - start_time

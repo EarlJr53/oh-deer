@@ -51,10 +51,10 @@ class Servo():
             error = target - self.pid.setpoint
             update = self.pid(error)
         else:
-            if target > self.setpoint:
-                update = 150
-            elif target < self.setpoint:
-                update = 50
+            if target < self.setpoint:
+                update = 135
+            elif target > self.setpoint:
+                update = 85
             else:
                 update = None
         self.bonnet.servo[0].angle = update

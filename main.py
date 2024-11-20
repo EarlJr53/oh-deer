@@ -45,10 +45,10 @@ def main():
         thermal.off()
 
     finally:
-        print("\nExited naturally")
-        ultrasonic.off()
-        servo.off()
-        thermal.off()
+        print("\nExited program")
+  #      ultrasonic.off()
+   #     servo.off()
+    #    thermal.off()
 
 
 main()

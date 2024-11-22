@@ -8,7 +8,7 @@ from adafruit_servokit import ServoKit
 from simple_pid import PID
 import random
 
-ideal_pos = 31 # I think since we're 80 pixels wide, we are aiming for roughly pixel 40 as the middle
+ideal_pos = 40 # I think since we're 80 pixels wide, we are aiming for roughly pixel 40 as the middle
 Kp = .1
 Ki = .01
 Kd = .01

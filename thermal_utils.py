@@ -116,7 +116,7 @@ class Thermal():
         # normalizes colors based on the min and max temp of the frame
         min_temp = self.dminav(self.frame.min())  # + 1.5
         max_temp = self.dmaxav(self.frame.max())  # - 1.5
-        frame = data_to_frame(self.frame, (80,62), hflip=False)
+        frame = data_to_frame(self.frame, (80,62), hflip=True)
 #        frame = np.rot90(frame, 1).copy()
 
         raw = frame.astype(np.uint8)
@@ -167,7 +167,7 @@ class Thermal():
                 cv.rectangle(bounding, (x, y), (x + w, y + h), (255, 0, 0), 1)  # draw box
                 
                 centroid_x = int(x + w/2) # horizontal centroid wrt pixels 0-80
-                centroid_y = int(y + h/2) # verticle centroid
+                centroid_y = int(y + h/2) # verticleMADINA AGÉNOR centroid
                 # print(f'centroid:{centroid_x}')
                 cv.circle(bounding, (centroid_x, centroid_y), 3, (255, 0, 0), 2)
                 # print(f'contour - x:{x}, y:{y}, w:{w}, h:{h}')
@@ -175,7 +175,7 @@ class Thermal():
                 # print('cycle done')
 
                 self.lock = True
-                self.deer_pos = centroid_y
+                self.deer_pos = centroid_x
 
                 if not self.recording:
                     self.recorder = Recorder()
@@ -208,7 +208,7 @@ class Recorder():
     def __init__(self):
 
         now = datetime.now()
-        date_folder = now.strftime("/home/ohdeer/oh-deer/auto-tests/%Y-%m-%d_clips/")
+        date_folder = now.strftime("/home/ohdeer/oh-deer/auto-clips/%Y-%m-%d_clips/")
         if not os.path.exists(date_folder):
             os.makedirs(date_folder)
 

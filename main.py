@@ -32,8 +32,8 @@ def main():
 
             else:
                 ultrasonic.off()
-                # servo.idle()
-                servo.off()
+                # servo.idle()  # make it idle after like 5 seconds of inactivity
+                servo.off()   # get rid of this for test
                 print("Idle")
 
             dwell_time = time.time() - start_time

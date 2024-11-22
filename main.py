@@ -1,4 +1,4 @@
-from deterrent_utils import Servo, Ultrasonic
+from deterrent_utils import Servo#, Ultrasonic
 from thermal_utils import Thermal
 import time
 
@@ -11,7 +11,7 @@ def main():
         max_dwell = 20  # max time to wait since last detection before sleep
 
         servo = Servo(pid_enable=False)
-        ultrasonic = Ultrasonic()
+        #ultrasonic = Ultrasonic()
         thermal = Thermal()
 
         while lock or (dwell_time < max_dwell):
@@ -31,7 +31,7 @@ def main():
                 print(target)
 
             else:
-                ultrasonic.off()
+                #ultrasonic.off()
                 # servo.idle()  # make it idle after like 5 seconds of inactivity
                 servo.off()   # get rid of this for test
                 print("Idle")
@@ -40,7 +40,7 @@ def main():
 
     except KeyboardInterrupt:
         print("\nExited by user")
-        ultrasonic.off()
+        #ultrasonic.off()
         servo.off()
         thermal.off()
 

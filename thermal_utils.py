@@ -5,7 +5,7 @@ import os
 import signal
 import time
 import logging
-import serial
+import serial168
 import numpy as np
 import cv2 as cv
 from datetime import datetime
@@ -208,7 +208,7 @@ class Recorder():
     def __init__(self):
 
         now = datetime.now()
-        date_folder = now.strftime("/mnt/ohdeer/oh-deer/auto-clips/%Y-%m-%d_clips/")
+        date_folder = now.strftime("home/ohdeer/oh-deer/auto-clips/%Y-%m-%d_clips/")
         if not os.path.exists(date_folder):
             os.makedirs(date_folder)
 

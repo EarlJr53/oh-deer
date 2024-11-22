@@ -209,7 +209,8 @@ class Recorder():
     def __init__(self):
 
         now = datetime.now()
-        date_folder = now.strftime("home/ohdeer/oh-deer/auto-clips/%Y-%m-%d_clips/")
+        date_folder = now.strftime("../usb/")
+        # date_folder = now.strftime("home/ohdeer/oh-deer/auto-clips/%Y-%m-%d_clips/")
         if not os.path.exists(date_folder):
             os.makedirs(date_folder)
 

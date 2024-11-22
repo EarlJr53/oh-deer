@@ -38,6 +38,7 @@ while True:
         break
 
     frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+    cv_render(frame, title='raw',resize=(400,310), colormap = 'gray', interpolation=cv.INTER_CUBIC)
 
     dminav = RollingAverageFilter(N=10)
     dmaxav = RollingAverageFilter(N=10)

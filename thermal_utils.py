@@ -209,13 +209,13 @@ class Recorder():
     def __init__(self):
 
         now = datetime.now()
-        date_folder = now.strftime("../usb/auto-clips/%Y-%m-%d_clips/")
-        # date_folder = now.strftime("home/ohdeer/oh-deer/auto-clips/%Y-%m-%d_clips/")
+        # date_folder = now.strftime("../usb/auto-clips/%Y-%m-%d_clips/")
+        date_folder = now.strftime("home/ohdeer/oh-deer/auto-clips/%Y-%m-%d_clips/")
         if not os.path.exists(date_folder):
             os.makedirs(date_folder)
 
         self.filename = now.strftime("%H-%M-%S")
-        self.fps = 15
+        self.fps = 1
         self.start_time = time.time()
 
         fourcc = cv.VideoWriter_fourcc(*'MJPG')  # Codec for .avi format

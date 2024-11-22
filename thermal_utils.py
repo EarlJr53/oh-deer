@@ -5,7 +5,7 @@ import os
 import signal
 import time
 import logging
-import serial168
+# import serial168
 import numpy as np
 import cv2 as cv
 from datetime import datetime
@@ -188,6 +188,7 @@ class Thermal():
 
         if self.recording:
             self.recorder.write_bbox(bounding)
+            print('writing to bbox')
 
             if self.recorder.get_time() >= self.rec_length:
                 self.recorder.stop()

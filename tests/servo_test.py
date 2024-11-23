@@ -13,10 +13,10 @@ kit = ServoKit(channels=16)
 #    print(x)
 #    x += 5
 
-# kit.servo[0].angle = None
+kit.servo[0].angle = None
 
 # kit.servo[0].angle = 0
-kit.continuous_servo[0].throttle = 1
+# kit.continuous_servo[0].throttle = 1
 #time.sleep(1)
 #kit.continuous_servo[0].throttle = -1
 # kit.servo[0].angle = 180

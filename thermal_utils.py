@@ -5,7 +5,7 @@ import os
 import signal
 import time
 import logging
-# import serial168
+import serial
 import numpy as np
 import cv2 as cv
 from datetime import datetime
@@ -188,7 +188,6 @@ class Thermal():
 
         if self.recording:
             self.recorder.write_bbox(bounding)
-            print('writing to bbox')
 
             if self.recorder.get_time() >= self.rec_length:
                 self.recorder.stop()
@@ -210,7 +209,7 @@ class Recorder():
 
         now = datetime.now()
         # date_folder = now.strftime("../usb/auto-clips/%Y-%m-%d_clips/")
-        date_folder = now.strftime("home/ohdeer/oh-deer/auto-clips/%Y-%m-%d_clips/")
+        date_folder = now.strftime("/home/ohdeer/oh-deer/auto-clips/%Y-%m-%d_clips/")
         if not os.path.exists(date_folder):
             os.makedirs(date_folder)
 

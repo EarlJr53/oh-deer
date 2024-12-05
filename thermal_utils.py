@@ -9,12 +9,15 @@ import serial
 import numpy as np
 import cv2 as cv
 from datetime import datetime
+import logging
 
 from senxor.mi48 import MI48, format_header, format_framestats
 from senxor.utils import data_to_frame, remap, cv_filter,\
                          cv_render, RollingAverageFilter,\
                          connect_senxor
 
+
+logger = logging.getLogger(__name__)
 
 class Thermal():
     def __init__(self):
@@ -208,18 +211,15 @@ class Recorder():
     def __init__(self):
 
         now = datetime.now()
-        # date_folder = now.strftime("../usb/auto-clips/%Y-%m-%d_clips/")
         date_folder = now.strftime("/home/ohdeer/oh-deer/auto-clips/%Y-%m-%d_clips/")
         if not os.path.exists(date_folder):
             os.makedirs(date_folder)
 
         self.filename = now.strftime("%H-%M-%S")
-        self.fps = 1
+        self.fps = 15
         self.start_time = time.time()
 
         fourcc = cv.VideoWriter_fourcc(*'MJPG')  # Codec for .avi format
-        # self.raw = cv.VideoWriter(f"{self.filename}_raw", fourcc, self.fps, (80, 62), isColor=False)
-        # self.processed = cv.VideoWriter(f"{self.filename}_processed", fourcc, self.fps, (80, 62), isColor=False)
         self.bbox = cv.VideoWriter(f"{date_folder}{self.filename}_bbox.avi", fourcc, self.fps, (80, 62), isColor=False)
 
     def get_time(self):
@@ -231,11 +231,11 @@ class Recorder():
 
     def stop(self):
         self.bbox.release()
-        print("Stop recording")
+        logger.info("Stop recording")
         del self
         
     def __del__(self):
-        print("Delete recorder")
+        logger.info("Delete recorder")
 
 
        

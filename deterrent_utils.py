@@ -13,9 +13,9 @@ logger = logging.getLogger(__name__)
 
 ideal_pos = 40 # I think since we're 80 pixels wide, we are aiming for roughly pixel 40 as the middle
 Kp = .1
-Ki = .01
-Kd = .01
-
+Ki = .0
+Kd = .0
+deadband = 5
 
 class Servo():
     def __init__(self, pid_enable=True, setpoint=ideal_pos, p=Kp, i=Ki, d=Kd, ):
@@ -28,7 +28,7 @@ class Servo():
             setpoint (_type_, optional): _description_. Defaults to ideal_pos.
         """
         if pid_enable:
-            self.pid = PID(p, i, d, setpoint=setpoint, output_limits=(50, 180))
+            self.pid = PID(p, i, d, setpoint=setpoint, output_limits=(85, 135))
         self.pid_enable = pid_enable
         self.setpoint = setpoint
         self.bonnet = ServoKit(channels=16)
@@ -41,7 +41,7 @@ class Servo():
 
     def idle(self):
         """Set servo to slowly spin at a continuous speed"""
-        self.bonnet.servo[0].angle = 90
+        self.bonnet.servo[0].angle = 100
 #        print("idle")
 
     def track(self, target):
@@ -54,12 +54,13 @@ class Servo():
             error = target - self.pid.setpoint
             update = self.pid(error)
         else:
-            if target < self.setpoint:
-                update = 135
-            elif target > self.setpoint:
-                update = 85
+            if target < (self.setpoint - deadband):
+                update = 130
+            elif target > (self.setpoint + deadband):
+                update = 90
             else:
                 update = None
+                print("stopped")
         self.bonnet.servo[0].angle = update
 #        print(f"Target: {target}, Speed updated to: {update}")
 

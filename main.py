@@ -2,7 +2,7 @@ from deterrent_utils import Servo, Ultrasonic
 from thermal_utils import Thermal
 import time
 import logging
-import datetime
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +12,7 @@ def main():
     logging.basicConfig(
         filename=filename,
         format='%(asctime)s %(levelname)-8s %(message)s',
-        # level=logging.INFO,
+        level=logging.INFO,
         datefmt='%Y-%m-%d %H:%M:%S'
     )
 

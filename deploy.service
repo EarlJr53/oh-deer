@@ -1,0 +1,12 @@
+[Unit]
+Description=Script to run ohdeer deployment
+After=multi-user.target
+#WantedBy=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/ohdeer/oh-deer/deploy.sh
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target

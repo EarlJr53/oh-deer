@@ -17,16 +17,19 @@ except:
           " to see the thermal image")
     exit(1)
 
+sys.path.append("/home/igoyal/RoboSys/oh-deer/thermal_sensor")
 from senxor.mi48 import MI48, format_header, format_framestats
 from senxor.utils import data_to_frame, remap, cv_filter,\
                          cv_render, RollingAverageFilter,\
                          connect_senxor
 
 # video recordings
-record = False
-output_file_raw = ''
-output_file_processed = ''
-output_file_bbox = ''
+record = True
+dir = '/home/igoyal/RoboSys/deer-test-vids/12_12_perception_test/5_m_foliage/'
+output_file_raw = dir + '1_raw.mp4'
+output_file_processed = dir + '1_processed.mp4'
+output_file_bbox = dir + '1_bbox.mp4'
+
 
 # other settings
 fps = 15
@@ -116,10 +119,12 @@ while True:
 
     if record:
         out_raw.write(raw.astype(np.uint8))
+        print(f'recording raw to {output_file_raw}')
+
     # don't create bounding boxes when there is not much temp variation in the frame (assume it is noise)
     not_noise = True
-    # if data.max() - data.min() < 10: # note: adjust this value to change threshold for noise
-    #     not_noise = False 
+    if data.max() - data.min() < 10: # note: adjust this value to change threshold for noise
+        not_noise = False 
 
     # clip bottom values if the difference is too high
     if max_temp - min_temp > 20:
